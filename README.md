@@ -18,14 +18,6 @@ repo sync
 
 项目路径是 `middleware/ros2/slam/spacemit-vslam`。
 
-评审尚未合并的 [PR #1](https://github.com/spacemit-robotics/ros2_spacemit_vslam/pull/1) 时，在 SDK 根目录执行以下命令检出 PR 当前提交，再继续编译。
-
-```bash
-git -C middleware/ros2/slam/spacemit-vslam fetch \
-    https://github.com/spacemit-robotics/ros2_spacemit_vslam.git refs/pull/1/head
-git -C middleware/ros2/slam/spacemit-vslam switch --detach FETCH_HEAD
-```
-
 ## 2. 编译
 
 ```bash
@@ -109,7 +101,6 @@ ros2 run bringup run_vio_replay.sh "$HOME/recording" "$HOME/replay"
 
 | 功能 | 公开头文件 | CMake 目标 |
 | --- | --- | --- |
-| 相机采集、标定、时钟及姿态滤波 | [`spacemit_camera/`](modules/camera/include/spacemit_camera) | `spacemit_camera::camera`、`spacemit_camera::calibration`、`spacemit_camera::clock`、`spacemit_camera::ahrs` |
 | 定位 | [`spacemit_vslam.h`](modules/vslam/include/spacemit_vslam.h) | `spacemit_vslam::spacemit_vslam` |
 | 建图和渲染 | [`spacemit_mapping.h`](modules/mapping/include/spacemit_mapping.h) | `spacemit_mapping::spacemit_mapping` |
 

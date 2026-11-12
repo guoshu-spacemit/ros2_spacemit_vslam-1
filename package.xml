@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>ros2_spacemit_vslam</name>
+  <version>0.1.0</version>
+  <description>Stereo localization and mapping integration for the Robot SDK.</description>
+  <maintainer email="robot_team@spacemit.com">robot_team</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <!-- SDK package keys; the executable build.sh remains the build entry. -->
+  <depend>components/multimedia/mpp</depend>
+  <depend>components/perception/stereo_matching</depend>
+  <depend>components/peripherals/imu</depend>
+  <!-- The project's colcon phase builds ROS packages separately from SDK dependencies. -->
+  <build_depend>middleware/ros2/peripherals/imu</build_depend>
+  <build_depend>components/multimedia/mpp/test/ros2_mpp_msgs</build_depend>
+  <exec_depend>middleware/ros2/peripherals/imu</exec_depend>
+  <exec_depend>components/multimedia/mpp/test/ros2_mpp_msgs</exec_depend>
+
+  <!-- The custom SDK entry must expose its internal packages' build requirements. -->
+  <system_depend realm="target">libboost-dev</system_depend>
+  <system_depend realm="target">libeigen3-dev</system_depend>
+  <system_depend realm="target">libyaml-cpp-dev</system_depend>
+  <system_depend realm="target">libopencv-dev</system_depend>
+  <system_depend realm="target">ocl-icd-opencl-dev</system_depend>
+  <system_depend realm="target">libavformat-dev</system_depend>
+  <system_depend realm="target">libavcodec-dev</system_depend>
+  <system_depend realm="target">libavutil-dev</system_depend>
+  <system_depend realm="target">libegl-dev</system_depend>
+  <system_depend realm="target">libgles-dev</system_depend>
+  <system_depend realm="target">libgbm-dev</system_depend>
+  <system_depend realm="target">libdrm-dev</system_depend>
+  <system_depend realm="target">libx11-dev</system_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>

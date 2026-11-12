@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>spacemit_camera</name>
+  <version>0.1.0</version>
+  <description>Native camera capture, metadata, calibration and timing SDK.</description>
+  <maintainer email="robot_team@spacemit.com">robot_team</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>cmake</buildtool_depend>
+  <depend arch="riscv64">mpp</depend>
+  <system_depend check="pkg-config --exists yaml-cpp">libyaml-cpp-dev</system_depend>
+  <system_depend>libboost-dev</system_depend>
+  <export><build_type>cmake</build_type></export>
+</package>

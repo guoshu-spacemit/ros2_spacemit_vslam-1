@@ -1,0 +1,20 @@
+{
+  "input": {"type": "uvc"},
+  "camera": {
+    "device": "/dev/v4l/by-id/usb-SEEKER_seeker1_omni_depth_123456789012-video-index0",
+    "width": 1088, "height": 5120, "fps": 20,
+    "input_format": "mjpeg", "decoded_format": "nv12"
+  },
+  "timestamp": {"source": "ros_clock"},
+  "metadata": {"enabled": false},
+  "streams": {
+    "full_only": true,
+    "full": {
+      "topic": "/camera/quad/frame_desc",
+      "frame_id": "camera_0_optical_frame",
+      "crop": {"x": 0, "y": 0, "width": 1088, "height": 5120}
+    }
+  },
+  "imu": {"enabled": false},
+  "buffers": {"max_exported_pairs": 8, "decoder_buffer_count": 24}
+}

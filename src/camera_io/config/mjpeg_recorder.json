@@ -1,0 +1,18 @@
+{
+  "output_dir": "recordings",
+  "cameras": [
+    {
+      "name": "camera0",
+      "topic": "/camera/mjpeg/frame_desc",
+      "codec": "mjpeg"
+    }
+  ],
+  "imus": [
+    {
+      "name": "camera0",
+      "topic": "/camera/imu/data_raw",
+      "enabled": true,
+      "queue_depth": 64
+    }
+  ]
+}

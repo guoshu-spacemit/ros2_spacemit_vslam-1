@@ -8,6 +8,7 @@ script_dir=$(cd "$(dirname "${script_path}")" && pwd)
 source "${script_dir}/sdk_paths.sh"
 workspace_root=${SPACEMIT_ROBOT_WORKSPACE_ROOT:-$(spacemit_robot_default_workspace "$script_dir")}
 run_dir=${SPACEMIT_ROBOT_RUN_DIR:-${workspace_root}/.run/stereo_las2_rtsp}
+supervisor="${script_dir}/run_detached_launch.py"
 
 spacemit_robot_sdk_paths "$workspace_root"
 workspace_setup=$SPACEMIT_ROBOT_WORKSPACE_SETUP
@@ -36,31 +37,6 @@ preview_disparity_max=${LAS2_PREVIEW_DISPARITY_MAX:-128.0}
 rtsp_url=${SPACEMIT_ROBOT_RTSP_URL:-rtsp://0.0.0.0:8554/stereo}
 rtsp_fps=${SPACEMIT_ROBOT_RTSP_FPS:-30}
 
-default_host_ip=$(ip -4 -o address show scope global 2>/dev/null |
-    awk '$4 ~ /^10\./ {sub(/\/.*/, "", $4); print $4; exit}')
-if [[ -z ${default_host_ip} ]]; then
-    default_host_ip=$(hostname -I | awk '{print $1}')
-fi
-host_ip=${SPACEMIT_ROBOT_HOST_IP:-${default_host_ip}}
-
-stop_stack()
-{
-    if [[ ! -s "${run_dir}/stack.pid" ]]; then
-        return
-    fi
-    local pgid
-    pgid=$(<"${run_dir}/stack.pid")
-    kill -INT -- "-${pgid}" 2>/dev/null || true
-    for _ in 1 2 3 4 5; do
-        sleep 1
-        pgrep -g "${pgid}" >/dev/null 2>&1 || break
-    done
-    if pgrep -g "${pgid}" >/dev/null 2>&1; then
-        kill -TERM -- "-${pgid}" 2>/dev/null || true
-    fi
-    rm -f "${run_dir}/stack.pid"
-}
-
 action=start
 case ${1:-} in
     "")
@@ -71,8 +47,11 @@ case ${1:-} in
     --check)
         action=check
         ;;
+    --status)
+        action=status
+        ;;
     *)
-        echo "Usage: $(basename "$0") [--stop|--check]" >&2
+        echo "Usage: $(basename "$0") [--stop|--check|--status]" >&2
         exit 2
         ;;
 esac
@@ -101,9 +80,8 @@ if [[ ${action} != check ]] && ((EUID != 0)); then
     exec sudo --preserve-env="${PRESERVED_ENVIRONMENT}" -- "${script_path}" "$@"
 fi
 
-if [[ ${action} == stop ]]; then
-    stop_stack
-    exit 0
+if [[ ${action} == stop || ${action} == status ]]; then
+    exec python3 "$supervisor" "$action" "$run_dir"
 fi
 
 for required in \
@@ -127,9 +105,6 @@ if [[ ${action} == check ]]; then
     exit 0
 fi
 
-stop_stack
-mkdir -p "${run_dir}"
-
 camera_device=${SPACEMIT_ROBOT_CAMERA_DEVICE:-}
 if [[ -z ${camera_device} ]]; then
     for video_device in /dev/video*; do
@@ -145,8 +120,11 @@ if [[ -z ${camera_device} ]]; then
     exit 1
 fi
 
+python3 "$supervisor" prepare "$run_dir"
 camera_config="${run_dir}/camera.json"
-python3 - "${camera_config_source}" "${camera_config}" \
+camera_config_temp=$(mktemp "${run_dir}/.camera.XXXXXX")
+trap 'rm -f -- "$camera_config_temp"' EXIT
+python3 - "${camera_config_source}" "${camera_config_temp}" \
     "${camera_device}" "${calibration_file}" <<'PY'
 import json
 import sys
@@ -160,10 +138,6 @@ with open(destination, "w", encoding="utf-8") as stream:
     json.dump(config, stream, indent=2)
     stream.write("\n")
 PY
-
-if command -v spacemit-tcm-smi >/dev/null 2>&1; then
-    env -u LD_PRELOAD spacemit-tcm-smi -c
-fi
 
 set +u
 # This setup file is selected by the deployment, outside the source tree.
@@ -182,7 +156,28 @@ export LD_LIBRARY_PATH="${mpp_library_dir}:${las2_library_dir}:\
 ${opencv_library_dir}:${ort_library_dir}:${LD_LIBRARY_PATH:-}"
 unset LD_PRELOAD
 
-setsid ros2 launch bringup stereo_las2_rtsp_launch.py \
+host_ip=${SPACEMIT_ROBOT_HOST_IP:-}
+if [[ -z ${host_ip} ]]; then
+    host_ip=$(ip -4 -o address show scope global 2>/dev/null |
+        awk '$4 ~ /^10\./ {sub(/\/.*/, "", $4); print $4; exit}' || true)
+    host_ip=${host_ip:-$(hostname -I | awk '{print $1}')}
+fi
+bringup_share=$(ros2 pkg prefix --share bringup)
+launch_path="${bringup_share}/launch/stereo_las2_rtsp_launch.py"
+if [[ ! -f ${launch_path} ]]; then
+    echo "Missing launch file: ${launch_path}" >&2
+    exit 1
+fi
+# The pre-start shell expands its own camera configuration arguments.
+# shellcheck disable=SC2016
+python3 "$supervisor" start "$run_dir" --before-start bash -ec '
+    if command -v spacemit-tcm-smi >/dev/null 2>&1; then
+        env -u LD_PRELOAD spacemit-tcm-smi -c
+    fi
+    mv -fT -- "$1" "$2"
+' prepare "$camera_config_temp" "$camera_config" -- \
+    stack launch.log python3 "${script_dir}/run_checked_launch.py" \
+    --status-file "${run_dir}/pipeline-status.json" "$launch_path" \
     camera_config_file:="${camera_config}" \
     camera_ld_preload:="${mpp_library_dir}/libmpp.so.1" \
     las2_ld_preload:="${las2_preload}" \
@@ -195,11 +190,9 @@ setsid ros2 launch bringup stereo_las2_rtsp_launch.py \
     preview_disparity_min:="${preview_disparity_min}" \
     preview_disparity_max:="${preview_disparity_max}" \
     rtsp_url:="${rtsp_url}" \
-    rtsp_fps:="${rtsp_fps}" \
-    > "${run_dir}/launch.log" 2>&1 < /dev/null &
-echo $! > "${run_dir}/stack.pid"
+    rtsp_fps:="${rtsp_fps}"
 
-echo "Stereo/LAS2/RTSP started: pgid=$(<"${run_dir}/stack.pid")"
+echo "Stereo/LAS2/RTSP submitted. Use --status to inspect the launch state."
 echo "Camera: ${camera_device}"
 echo "RTSP: ${rtsp_url/0.0.0.0/${host_ip}}"
 echo "Log: ${run_dir}/launch.log"

@@ -9,6 +9,7 @@ script_dir=$(cd "$(dirname "${script_path}")" && pwd)
 source "${script_dir}/sdk_paths.sh"
 workspace_root=${SPACEMIT_ROBOT_WORKSPACE_ROOT:-$(spacemit_robot_default_workspace "$script_dir")}
 run_dir=${SPACEMIT_ROBOT_RUN_DIR:-/tmp/headless_esdf_rtsp}
+supervisor="${script_dir}/run_detached_launch.py"
 
 spacemit_robot_sdk_paths "$workspace_root"
 workspace_setup=$SPACEMIT_ROBOT_WORKSPACE_SETUP
@@ -47,37 +48,21 @@ las2_preview_disparity_max=${LAS2_PREVIEW_DISPARITY_MAX:-128.0}
 rtsp_input_topic=${SPACEMIT_ROBOT_RTSP_INPUT_TOPIC:-/camera/left/frame_desc}
 rtsp_url=${SPACEMIT_ROBOT_RTSP_URL:-rtsp://0.0.0.0:8554/left}
 
-stop_stack()
-{
-    if [[ ! -s "${run_dir}/stack.pid" ]]; then
-        return
-    fi
-    local pgid
-    pgid=$(<"${run_dir}/stack.pid")
-    kill -INT -- "-${pgid}" 2>/dev/null || true
-    for _ in 1 2 3 4 5; do
-        sleep 1
-        pgrep -g "${pgid}" >/dev/null 2>&1 || break
-    done
-    if pgrep -g "${pgid}" >/dev/null 2>&1; then
-        kill -TERM -- "-${pgid}" 2>/dev/null || true
-    fi
-    rm -f "${run_dir}/stack.pid"
-}
-
 check_only=false
 case ${1:-} in
     "")
         ;;
     --stop)
-        stop_stack
-        exit 0
+        exec python3 "$supervisor" stop "$run_dir"
+        ;;
+    --status)
+        exec python3 "$supervisor" status "$run_dir"
         ;;
     --check)
         check_only=true
         ;;
     *)
-        echo "Usage: $(basename "$0") [--stop|--check]" >&2
+        echo "Usage: $(basename "$0") [--stop|--check|--status]" >&2
         exit 2
         ;;
 esac
@@ -104,9 +89,6 @@ if ${check_only}; then
     exit 0
 fi
 
-stop_stack
-mkdir -p "${run_dir}"
-
 camera_device=${SPACEMIT_ROBOT_CAMERA_DEVICE:-}
 if [[ -z ${camera_device} ]]; then
     for video_device in /dev/video*; do
@@ -121,8 +103,11 @@ if [[ -z ${camera_device} ]]; then
     echo "No 4000x1200 UVC stereo camera was found" >&2
     exit 1
 fi
+python3 "$supervisor" prepare "$run_dir"
 camera_config="${run_dir}/camera.json"
-python3 - "${camera_config_source}" "${camera_config}" \
+camera_config_temp=$(mktemp "${run_dir}/.camera.XXXXXX")
+trap 'rm -f -- "$camera_config_temp"' EXIT
+python3 - "${camera_config_source}" "${camera_config_temp}" \
     "${camera_device}" "${calibration_file}" <<'PY'
 import json
 import sys
@@ -136,10 +121,6 @@ with open(destination, "w", encoding="utf-8") as stream:
     json.dump(config, stream, indent=2)
     stream.write("\n")
 PY
-
-if command -v spacemit-tcm-smi >/dev/null 2>&1; then
-    env -u LD_PRELOAD spacemit-tcm-smi -c
-fi
 
 set +u
 # This setup file is selected by the deployment, outside the source tree.
@@ -164,7 +145,22 @@ if [[ -n ${SPACEMIT_ROBOT_RECORD_SESSION_DIR:-} ]]; then
                        "record_vio:=${SPACEMIT_ROBOT_RECORD_VIO:-true}")
 fi
 
-setsid ros2 launch bringup "${launch_file}" "${record_arguments[@]}" \
+bringup_share=$(ros2 pkg prefix --share bringup)
+launch_path="${bringup_share}/launch/${launch_file}"
+if [[ ! -f ${launch_path} ]]; then
+    echo "Missing launch file: ${launch_path}" >&2
+    exit 1
+fi
+# The pre-start shell expands its own camera configuration arguments.
+# shellcheck disable=SC2016
+python3 "$supervisor" start "$run_dir" --before-start bash -ec '
+    if command -v spacemit-tcm-smi >/dev/null 2>&1; then
+        env -u LD_PRELOAD spacemit-tcm-smi -c
+    fi
+    mv -fT -- "$1" "$2"
+' prepare "$camera_config_temp" "$camera_config" -- \
+    stack launch.log python3 "${script_dir}/run_checked_launch.py" \
+    --status-file "${run_dir}/pipeline-status.json" "$launch_path" "${record_arguments[@]}" \
     camera_config_file:="${camera_config}" \
     camera_ld_preload:="${mpp_library_dir}/libmpp.so.1" \
     las2_ld_preload:="${las2_preload}" \
@@ -197,11 +193,9 @@ setsid ros2 launch bringup "${launch_file}" "${record_arguments[@]}" \
     max_integration_distance_m:="${max_integration_distance_m}" \
     projective_tsdf_integrator_invalid_depth_decay_factor:="${invalid_depth_decay_factor}" \
     truncation_distance_m:=0.15 \
-    render_point_size:=8.0 \
-    > "${run_dir}/launch.log" 2>&1 < /dev/null &
-echo $! > "${run_dir}/stack.pid"
+    render_point_size:=8.0
 
-echo "Headless reconstruction started: pgid=$(<"${run_dir}/stack.pid")"
+echo "Headless reconstruction submitted. Use --status to inspect the launch state."
 echo "SpaceMIT ONNX Runtime library directory: ${ort_library_dir}"
 if [[ ${enable_rtsp} == true ]]; then
     echo "Primary video: ${rtsp_url/0.0.0.0/${host_ip}}"

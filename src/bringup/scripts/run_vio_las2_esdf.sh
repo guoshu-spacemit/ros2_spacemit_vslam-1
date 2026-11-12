@@ -8,6 +8,17 @@ script_dir=$(cd "$(dirname "${script_path}")" && pwd)
 source "${script_dir}/sdk_paths.sh"
 workspace_root=${SPACEMIT_ROBOT_WORKSPACE_ROOT:-$(spacemit_robot_default_workspace "$script_dir")}
 run_dir=${SPACEMIT_ROBOT_RUN_DIR:-/tmp/vio_las2_esdf}
+supervisor="${script_dir}/run_detached_launch.py"
+
+case ${1:-} in
+    --stop) exec python3 "$supervisor" stop "$run_dir" ;;
+    --status) exec python3 "$supervisor" status "$run_dir" ;;
+    "") ;;
+    *)
+        echo "Usage: $(basename "$0") [--stop|--status]" >&2
+        exit 2
+        ;;
+esac
 
 spacemit_robot_sdk_paths "$workspace_root"
 workspace_setup=$SPACEMIT_ROBOT_WORKSPACE_SETUP
@@ -62,45 +73,6 @@ if [[ -z ${record_timestamp_origin_zero} ]]; then
     fi
 fi
 
-stop_process_group()
-{
-    local pid_file=$1
-    if [[ ! -s "${pid_file}" ]]; then
-        return
-    fi
-    local pgid
-    pgid=$(<"${pid_file}")
-    kill -INT -- "-${pgid}" 2>/dev/null || true
-    for _ in 1 2 3 4 5; do
-        sleep 1
-        pgrep -g "${pgid}" >/dev/null 2>&1 || break
-    done
-    if pgrep -g "${pgid}" >/dev/null 2>&1; then
-        kill -TERM -- "-${pgid}" 2>/dev/null || true
-        sleep 2
-    fi
-    if pgrep -g "${pgid}" >/dev/null 2>&1; then
-        kill -KILL -- "-${pgid}" 2>/dev/null || true
-    fi
-    rm -f "${pid_file}"
-}
-
-stop_stack()
-{
-    stop_process_group "${run_dir}/bridge.pid"
-    stop_process_group "${run_dir}/stack.pid"
-}
-
-if [[ ${1:-} == "--stop" ]]; then
-    stop_stack
-    exit 0
-fi
-
-if [[ $# -ne 0 ]]; then
-    echo "Usage: $(basename "$0") [--stop]" >&2
-    exit 2
-fi
-
 for runtime_variable in LAS2_MODEL_PATH SPACEMIT_ROBOT_CALIBRATION_FILE FOXGLOVE_RUNNER; do
     if [[ -z ${!runtime_variable:-} ]]; then
         echo "Set $runtime_variable to the required deployment file." >&2
@@ -114,28 +86,21 @@ for required in \
     "${workspace_setup}" \
     "${mpp_library_dir}/libmpp.so.1" \
     "${las2_library_dir}/libstereo_matching_pipeline.so" \
-    "${opencv_library_dir}/libopencv_core.so.413" \
     "${las2_runtime_files[@]}" \
     "${model_path}" \
-    "${calibration_file}" \
-    "${foxglove_runner}"; do
+    "${calibration_file}"; do
     [[ -e ${required} ]] || {
         echo "Missing required reconstruction runtime path: ${required}" >&2
         exit 1
     }
 done
+if [[ ! -f ${foxglove_runner} || ! -x ${foxglove_runner} ]]; then
+    echo "Foxglove runner must be executable: ${foxglove_runner}" >&2
+    exit 1
+fi
 if [[ -n ${input_file} && ! -f ${input_file} ]]; then
     echo "Missing input file: ${input_file}" >&2
     exit 1
-fi
-
-stop_stack
-mkdir -p "${run_dir}"
-
-# Load the selected runtime at process start. TCM cleanup must happen before
-# setting preload for either the packaged runtime or the external ORT/EP pair.
-if command -v spacemit-tcm-smi >/dev/null 2>&1; then
-    env -u LD_PRELOAD spacemit-tcm-smi -c
 fi
 
 set +u
@@ -149,11 +114,19 @@ source "${mpp_messages_setup}"
 source "${workspace_setup}"
 set -u
 
+bringup_share=$(ros2 pkg prefix --share bringup)
+launch_path="${bringup_share}/launch/vio_las2_esdf_launch.py"
+if [[ ! -f ${launch_path} ]]; then
+    echo "Missing launch file: ${launch_path}" >&2
+    exit 1
+fi
 export LD_LIBRARY_PATH="${SPACEMIT_ROBOT_SDK_PREFIX}/lib:${mpp_library_dir}:${spacemit_vslam_library_dir}:${las2_library_dir}:${opencv_library_dir}:${ort_library_dir}:${LD_LIBRARY_PATH:-}"
-export LD_PRELOAD="${mpp_library_dir}/libmpp.so.1:${las2_preload}${LD_PRELOAD:+:${LD_PRELOAD}}"
+unset LD_PRELOAD
 
 launch_arguments=(
     input_file:="${input_file}"
+    camera_ld_preload:="${mpp_library_dir}/libmpp.so.1"
+    las2_ld_preload:="${las2_preload}"
     model_path:="${model_path}"
     calibration_file:="${calibration_file}"
     las2_instance_count:="${las2_instance_count}"
@@ -195,20 +168,21 @@ if [[ -n ${camera_config_file} ]]; then
     launch_arguments+=(camera_config_file:="${camera_config_file}")
 fi
 
-setsid ros2 launch bringup vio_las2_esdf_launch.py \
-    "${launch_arguments[@]}" \
-    > "${run_dir}/launch.log" 2>&1 < /dev/null &
-echo $! > "${run_dir}/stack.pid"
-
-setsid env -u LD_PRELOAD -u LD_LIBRARY_PATH \
+# Clear TCM only after the previous stack has released its resources.
+python3 "$supervisor" start "$run_dir" --before-start bash -ec '
+    if command -v spacemit-tcm-smi >/dev/null 2>&1; then
+        env -u LD_PRELOAD spacemit-tcm-smi -c
+    fi
+' -- \
+    stack launch.log python3 "${script_dir}/run_checked_launch.py" \
+    --status-file "${run_dir}/pipeline-status.json" "$launch_path" "${launch_arguments[@]}" \
+    ::: bridge foxglove.log env -u LD_PRELOAD -u LD_LIBRARY_PATH \
     ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-0}" \
     TOPIC_WHITELIST="['^/vio/pose/image$','^/vio/pose/imu$','^/vio/trajectory$','^/vio/visualization$','^/tf$','^/tf_static$','^/esdf/colored_pointcloud$','^/rosout$']" \
     BEST_EFFORT_QOS_TOPIC_WHITELIST="['^/vio/pose/image$','^/vio/pose/imu$','^/vio/trajectory$','^/esdf/colored_pointcloud$']" \
-    "${foxglove_runner}" --domain-id "${ROS_DOMAIN_ID:-0}" \
-    > "${run_dir}/foxglove.log" 2>&1 < /dev/null &
-echo $! > "${run_dir}/bridge.pid"
+    "${foxglove_runner}" --domain-id "${ROS_DOMAIN_ID:-0}"
 
-echo "RVV reconstruction stack started: pgid=$(<"${run_dir}/stack.pid")"
+echo "RVV reconstruction submitted. Use --status to inspect the launch state."
 echo "SpaceMIT ONNX Runtime library directory: ${ort_library_dir}"
 echo "Foxglove: ws://${host_ip}:8765"
 echo "Logs: ${run_dir}/launch.log and ${run_dir}/foxglove.log"

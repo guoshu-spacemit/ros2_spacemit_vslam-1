@@ -7,6 +7,10 @@ export SPACEMIT_ROBOT_RUN_DIR=${SPACEMIT_ROBOT_RUN_DIR:-/tmp/vio_record}
 export SPACEMIT_ROBOT_ENABLE_RTSP=false SPACEMIT_ROBOT_ENABLE_ESDF_RTSP=false
 export SPACEMIT_ROBOT_PUBLISH_LAS2_PREVIEW=false
 
+if [[ ${1:-} == --stop || ${1:-} == --status ]]; then
+    exec "${SCRIPT_DIR}/run_headless_esdf_rtsp.sh" "$@"
+fi
+
 if [[ -z ${SPACEMIT_ROBOT_RECORD_SESSION_DIR:-} ]]; then
     RECORD_OUTPUT_DIR=${SPACEMIT_ROBOT_RECORD_OUTPUT_DIR:-}
     if [[ -z ${RECORD_OUTPUT_DIR} ]]; then

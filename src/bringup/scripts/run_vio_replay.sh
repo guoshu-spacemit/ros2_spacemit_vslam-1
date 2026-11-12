@@ -38,6 +38,6 @@ ros2 launch bringup vio_replay_launch.py \
 pipeline_status=("${PIPESTATUS[@]}")
 set -e
 [[ ! -d "$output_dir" ]] || mv -- "${output_dir}.launch.log" "$output_dir/launch.log"
-ros2 run bringup check_vio_replay.py "$session_dir" "$output_dir"
+[[ ${pipeline_status[0]} -eq 0 ]] || exit "${pipeline_status[0]}"
 [[ ${pipeline_status[1]} -eq 0 ]] || exit "${pipeline_status[1]}"
-exit "${pipeline_status[0]}"
+exec ros2 run bringup check_vio_replay.py "$session_dir" "$output_dir"

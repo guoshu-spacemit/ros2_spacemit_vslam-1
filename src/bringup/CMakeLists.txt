@@ -5,7 +5,8 @@ find_package(ament_cmake REQUIRED)
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 install(
-  FILES scripts/calibration_bundle.py scripts/sdk_paths.sh scripts/terminal_ui.py
+  FILES scripts/calibration_bundle.py scripts/run_detached_launch.py
+    scripts/sdk_paths.sh scripts/terminal_ui.py
   DESTINATION lib/${PROJECT_NAME})
 
 install(

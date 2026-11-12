@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>spacemit_mapping</name>
+  <version>0.1.0</version>
+  <description>SpacemiT CPU and RVV mapping, distance field and rendering C++ SDK.</description>
+  <maintainer email="robot_team@spacemit.com">robot_team</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>cmake</buildtool_depend>
+  <system_depend realm="target">libegl-dev</system_depend>
+  <system_depend realm="target">libgles-dev</system_depend>
+  <system_depend realm="target">libgbm-dev</system_depend>
+  <system_depend realm="target">libdrm-dev</system_depend>
+  <system_depend realm="target">zlib1g</system_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>

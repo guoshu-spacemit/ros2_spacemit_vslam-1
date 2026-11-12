@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>esdf_drm</name>
+  <version>0.1.0</version>
+  <description>Event-driven RVV spacemit_mapping ESDF integration and standard ROS 2 point-cloud publication.</description>
+  <maintainer email="guoshu@example.com">guoshu</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>mpp_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>common</depend>
+
+  <depend>spacemit_mapping</depend>
+
+
+  <depend>mpp</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <system_depend realm="target">libegl-dev</system_depend>
+    <system_depend realm="target">libgles-dev</system_depend>
+    <system_depend realm="target">libgbm-dev</system_depend>
+    <system_depend realm="target">libdrm-dev</system_depend>
+    <system_depend realm="target">libx11-dev</system_depend>
+    <!-- Interface libraries alone do not provide the K3 GPU driver. -->
+    <system_depend arch="riscv64" realm="target">img-gpu-powervr</system_depend>
+    <system_depend arch="riscv64" realm="target">libegl-pvr0</system_depend>
+    <system_depend arch="riscv64" realm="target">libgbm1-pvr</system_depend>
+    <system_depend arch="riscv64" realm="target">libgl1-pvr-dri</system_depend>
+    <system_depend arch="riscv64" realm="target">libglapi-pvr</system_depend>
+    <system_depend arch="riscv64" realm="target">pvr-vulkan-drivers</system_depend>
+  </export>
+</package>

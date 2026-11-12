@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>spacemit_vslam</name>
+  <version>0.1.0</version>
+  <description>SpacemiT functional localization SDK with calibration, pose and uncertainty data models.</description>
+  <maintainer email="robot_team@spacemit.com">robot_team</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>cmake</buildtool_depend>
+  <depend>libopencv-dev</depend>
+
+  <export>
+    <build_type>cmake</build_type>
+    <system_depend realm="target">libopencv-dev</system_depend>
+  </export>
+</package>

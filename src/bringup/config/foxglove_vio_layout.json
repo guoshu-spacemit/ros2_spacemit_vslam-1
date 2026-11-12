@@ -1,0 +1,81 @@
+{
+  "configById": {
+    "3D!VIO trajectory": {
+      "cameraState": {
+        "distance": 2.5,
+        "far": 5000,
+        "fovy": 45,
+        "near": 0.01,
+        "perspective": true,
+        "phi": 45,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 135
+      },
+      "scene": {
+        "backgroundColor": "#090d12",
+        "enableStats": true,
+        "labelScaleFactor": 1,
+        "transforms": { "showLabel": true, "editable": false }
+      },
+      "topics": {
+        "/vio/trajectory": { "visible": false },
+        "/vio/visualization": { "visible": true },
+        "/vio/pose/image": { "visible": true },
+        "/vio/pose/imu": { "visible": false }
+      },
+      "layers": {
+        "vio-world-grid": {
+          "visible": true,
+          "frameLocked": true,
+          "label": "VIO World Grid",
+          "instanceId": "vio-world-grid",
+          "layerId": "foxglove.Grid",
+          "frameId": "vio_world",
+          "size": 10,
+          "divisions": 50,
+          "lineWidth": 1,
+          "color": "#6b7280",
+          "position": [0, 0, 0],
+          "rotation": [0, 0, 0],
+          "order": 1
+        }
+      }
+    },
+    "Plot!VIO position": {
+      "legendDisplay": "floating",
+      "paths": [
+        { "enabled": true, "label": "image pose x", "timestampMethod": "headerStamp", "value": "/vio/pose/image.pose.pose.position.x" },
+        { "enabled": true, "label": "image pose y", "timestampMethod": "headerStamp", "value": "/vio/pose/image.pose.pose.position.y" },
+        { "enabled": true, "label": "image pose z", "timestampMethod": "headerStamp", "value": "/vio/pose/image.pose.pose.position.z" },
+        { "enabled": true, "label": "IMU propagated x", "timestampMethod": "headerStamp", "value": "/vio/pose/imu.pose.pose.position.x" }
+      ],
+      "showLegend": true,
+      "showXAxisLabels": true,
+      "showYAxisLabels": true,
+      "xAxisVal": "timestamp"
+    },
+    "RawMessages!image pose": {
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showFullMessageForDiff": false,
+      "topicPath": "/vio/pose/image"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": { "speed": 1 },
+  "layout": {
+    "direction": "row",
+    "first": "3D!VIO trajectory",
+    "second": {
+      "direction": "column",
+      "first": "Plot!VIO position",
+      "second": "RawMessages!image pose",
+      "splitPercentage": 55
+    },
+    "splitPercentage": 70
+  }
+}

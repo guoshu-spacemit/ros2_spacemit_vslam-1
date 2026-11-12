@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>vio</name>
+  <version>0.1.0</version>
+  <description>ROS 2 stereo-inertial odometry node for the K3 ROBOT pipeline.</description>
+  <maintainer email="guoshu@example.com">guoshu</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>std_srvs</depend>
+  <depend>rclcpp_components</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>message_filters</depend>
+  <depend>mpp_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>common</depend>
+  <depend>visualization_msgs</depend>
+  <depend>yaml-cpp</depend>
+  <depend>eigen</depend>
+
+  <depend>spacemit_camera</depend>
+  <depend>spacemit_vslam</depend>
+
+
+  <depend>mpp</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <system_depend realm="target">libeigen3-dev</system_depend>
+    <system_depend realm="target">libyaml-cpp-dev</system_depend>
+  </export>
+</package>

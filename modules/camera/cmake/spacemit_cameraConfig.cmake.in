@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Threads)
+find_dependency(yaml-cpp)
+include("${CMAKE_CURRENT_LIST_DIR}/spacemit_cameraTargets.cmake")
+check_required_components(spacemit_camera)

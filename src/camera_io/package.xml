@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>camera_io</name>
+  <version>0.1.0</version>
+  <description>Camera capture, metadata, replay and independently scheduled recording.</description>
+  <maintainer email="robot_team@spacemit.com">robot_team</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>spacemit_camera</depend>
+  <depend>common</depend>
+  <depend>mpp</depend>
+  <depend>mpp_msgs</depend>
+  <build_depend>peripherals_imu_node</build_depend>
+  <exec_depend>peripherals_imu_node</exec_depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>sensor_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>tf2_ros</depend>
+  <depend>boost</depend>
+  <depend>yaml-cpp</depend>
+  <depend>fastcdr</depend>
+  <depend>fastrtps</depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+    <system_depend realm="target">libavformat-dev</system_depend>
+    <system_depend realm="target">libavcodec-dev</system_depend>
+    <system_depend realm="target">libavutil-dev</system_depend>
+  </export>
+</package>

@@ -1,0 +1,20 @@
+{
+  "camera_config_file": "/path/to/camera.json",
+  "calibration_file": "/path/to/calibration.yaml",
+  "imu_calibration_file": "/path/to/calibration.yaml",
+  "model_path": "~/.cache/models/vision/LAS2_M_288x384.fp16.onnx",
+  "recorder_parameters": {
+    "camera_write_queue_depth": 128,
+    "camera_write_buffer_bytes": 2097152
+  },
+  "launch_arguments": {
+    "enable_stationary_initialization": false,
+    "minimum_observation_depth_m": 0.0,
+    "asynchronous_processing": true,
+    "las2_instance_count": 2,
+    "las2_threads_per_instance": 4,
+    "las2_core_affinity": "8;9;10;11/12;13;14;15",
+    "las2_warmup_iterations": 4,
+    "las2_preview_visualization": "disparity"
+  }
+}

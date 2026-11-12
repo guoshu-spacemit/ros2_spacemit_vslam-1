@@ -1,0 +1,47 @@
+{
+  "camera_config_file": "camera.json",
+  "calibration_file": "/path/to/camera_io/config/0.yaml",
+  "model_path": "~/.cache/models/vision/LAS2_M_288x384.fp16.onnx",
+  "video_config_file": "fpv/sky.yaml",
+  "camera_device": "",
+  "camera_fps": 60,
+  "odometry_mode": "vio",
+  "timestamp_source": "embedded_exposure_start",
+  "ros_domain_id": 230,
+  "cpu_affinity": "0-7",
+  "headless_render": true,
+  "private_mpp_ipc": true,
+  "network": {
+    "configure": false,
+    "prefix_length": 24
+  },
+  "runtime_environment": {
+    "MPP_PLUGIN_DIR": "../lib",
+    "LD_LIBRARY_PATH": "../lib:../install/lib"
+  },
+  "launch_arguments": {
+    "enable_stationary_initialization": false,
+    "minimum_observation_depth_m": 0.0,
+    "asynchronous_processing": true,
+    "slam_enabled": false,
+    "imu_frequency_hz": 0.0,
+    "las2_instance_count": 2,
+    "las2_threads_per_instance": 4,
+    "las2_core_affinity": "8;9;10;11/12;13;14;15",
+    "las2_warmup_iterations": 4,
+    "publish_las2_preview": true,
+    "las2_preview_visualization": "depth",
+    "feature_panel_enabled": false,
+    "gravity_align_map": true,
+    "follow_slice_height": true,
+    "slice_thickness_m": 0.05,
+    "slice_height_offset_m": 0.0,
+    "max_integration_distance_m": 3.0,
+    "map_clearing_radius_m": 0.0,
+    "clear_map_outside_radius_rate_hz": 1.0,
+    "render_trajectory_duration_s": 0.0,
+    "truncation_distance_m": 0.15,
+    "render_point_size": 8.0,
+    "video_cpu_affinity": "0-7"
+  }
+}

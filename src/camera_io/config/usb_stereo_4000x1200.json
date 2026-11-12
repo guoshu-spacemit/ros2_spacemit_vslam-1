@@ -1,0 +1,108 @@
+{
+  "input": {
+    "type": "uvc"
+  },
+  "camera": {
+    "device": "/dev/video9",
+    "width": 4000,
+    "height": 1200,
+    "fps": 60,
+    "input_format": "mjpeg",
+    "decoded_format": "nv12"
+  },
+  "timestamp": {
+    "source": "embedded_exposure_midpoint"
+  },
+  "calibration": {
+    "format": "kalibr",
+    "file": "0.yaml",
+    "publish_imu_tf": false
+  },
+  "metadata": {
+    "enabled": true,
+    "parser": "camera_sdk_embedded",
+    "region": {
+      "x": 0,
+      "y": 0,
+      "width": 160,
+      "height": 768
+    }
+  },
+  "streams": {
+    "left": {
+      "topic": "/camera/left/frame_desc",
+      "camera_info_topic": "/camera/left/camera_info",
+      "frame_id": "camera_left_optical_frame",
+      "crop": {
+        "x": 2080,
+        "y": 0,
+        "width": 1920,
+        "height": 1200
+      },
+      "output": {
+        "width": 640,
+        "height": 400
+      }
+    },
+    "right": {
+      "topic": "/camera/right/frame_desc",
+      "camera_info_topic": "/camera/right/camera_info",
+      "frame_id": "camera_right_optical_frame",
+      "crop": {
+        "x": 160,
+        "y": 0,
+        "width": 1920,
+        "height": 1200
+      },
+      "output": {
+        "width": 640,
+        "height": 400
+      }
+    },
+    "full": {
+      "topic": "/camera/full/frame_desc",
+      "frame_id": "camera_full_frame",
+      "crop": {
+        "x": 0,
+        "y": 0,
+        "width": 4000,
+        "height": 1200
+      }
+    },
+    "compressed": {
+      "enabled": true,
+      "topic": "/camera/mjpeg/frame_desc",
+      "frame_id": "camera_full_frame"
+    }
+  },
+  "imu": {
+    "enabled": true,
+    "frame_id": "camera_imu",
+    "domain_id": 0,
+    "queue_depth": 16,
+    "samples_per_frame": 10,
+    "raw": {
+      "dds_topic": "rt/camera/imu/data_raw",
+      "ros_topic": "/camera/imu/data_raw"
+    },
+    "ahrs": {
+      "enabled": true,
+      "dds_topic": "rt/camera/imu/data",
+      "ros_topic": "/camera/imu/data",
+      "kp": 1.0,
+      "ki": 0.0,
+      "accel_rejection_m_s2": 3.0,
+      "max_dt_ms": 50.0,
+      "orientation_stddev_rad": 0.05
+    }
+  },
+  "buffers": {
+    "max_exported_pairs": 6,
+    "decoder_buffer_count": 16,
+    "decoder_input_pool": {
+      "enabled": true,
+      "slot_bytes": 6291456,
+      "slot_count": 4
+    }
+  }
+}

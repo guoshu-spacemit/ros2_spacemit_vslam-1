@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "package": "spacemit_vslam",
+  "target": {
+    "system": "Linux",
+    "processor": "riscv64",
+    "elf_class": 64,
+    "endianness": "little",
+    "isa": "rv64i2p1_m2p0_a2p1_f2p2_d2p2_c2p0_b1p0_v1p0_zicbom1p0_zicbop1p0_zicboz1p0_zicsr2p0_zifencei2p0_zmmul1p0_zaamo1p0_zalrsc1p0_zca1p0_zcd1p0_zba1p0_zbb1p0_zbc1p0_zbs1p0_zve32f1p0_zve32x1p0_zve64d1p0_zve64f1p0_zve64x1p0_zvl128b1p0_zvl256b1p0_zvl32b1p0_zvl64b1p0",
+    "abi": "lp64d",
+    "board": "SpacemiT K3 / X100",
+    "distribution": "Bianbu 4.0.1"
+  },
+  "build": {
+    "compiler": "SpacemiT GCC 15.2.0 (gf3b8c022145)",
+    "toolchain": "spacemit-toolchain-linux-glibc-x86_64-v1.2.4",
+    "cmake": "cmake version 3.28.3",
+    "build_type": "Release",
+    "cxx_standard": 17,
+    "strip": "GNU strip --strip-unneeded",
+    "product_api": "spacemit_vslam::localization",
+    "engine": "k3VSLAM",
+    "source_archive_sha256": "4dcf338561d0bd076e7512745aea1e8977a145ef7e7b3e11665bf997a3a718ae",
+    "eigen": "eigen-spacemit 5.0.1-1bb1",
+    "opencv": "system OpenCV 4.10 (.410)"
+  },
+  "features": {
+    "session_api": true,
+    "functional_cpp_api": true,
+    "rvv_implementation": true,
+    "stereo": true,
+    "inertial": true,
+    "global_slam": true,
+    "loop_closure_events": false,
+    "map_persistence": false,
+    "relocalization": false,
+    "stationary_initialization": false,
+    "monocular": false
+  },
+  "libraries": [
+    "lib/libspacemit_vslam.so"
+  ],
+  "elf": {
+    "lib/libspacemit_vslam.so": {
+      "sha256": "d7f952b205b9a007068166a5e720f0cb80765030d14e848198e27487a640f7e8",
+      "bytes": 913056,
+      "dynamic_exports": 34,
+      "exports_sha256": "71e8a01dab3a530788eb81a8d3df11fd5b9ab56afaea3c5573a2fea91af3437d",
+      "exports_sha256_format": "sorted versioned names from nm -D --defined-only, one per LF-terminated line",
+      "needed": [
+        "libopencv_core.so.410",
+        "libopencv_imgcodecs.so.410",
+        "libopencv_video.so.410",
+        "libopencv_dnn.so.410",
+        "libopencv_calib3d.so.410",
+        "libopencv_features2d.so.410",
+        "libopencv_imgproc.so.410",
+        "libopencv_flann.so.410",
+        "libstdc++.so.6",
+        "libm.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6",
+        "ld-linux-riscv64-lp64d.so.1"
+      ],
+      "soname": [
+        "libspacemit_vslam.so"
+      ],
+      "search_paths": [],
+      "isa": "rv64i2p1_m2p0_a2p1_f2p2_d2p2_c2p0_b1p0_v1p0_zicbom1p0_zicbop1p0_zicboz1p0_zicsr2p0_zifencei2p0_zmmul1p0_zaamo1p0_zalrsc1p0_zca1p0_zcd1p0_zba1p0_zbb1p0_zbc1p0_zbs1p0_zve32f1p0_zve32x1p0_zve64d1p0_zve64f1p0_zve64x1p0_zvl128b1p0_zvl256b1p0_zvl32b1p0_zvl64b1p0",
+      "stripped": true
+    }
+  },
+  "files": {
+    "include/spacemit_vslam.h": "aa33eb27f429ce238ac17def3b993f65e339a930b8fa7930d4c6dec7f165e3be",
+    "lib/cmake/spacemit_vslam/spacemit_vslamConfig.cmake": "8be1089d1996f11ab96dadd308bb2233282834df3f398712361de2e8d5f9d3d9",
+    "lib/cmake/spacemit_vslam/spacemit_vslamTargets-release.cmake": "c7f0f5212f2346e2fb6b300f7e56f167302185f201cdbc4481a0d57f5c6850b9",
+    "lib/cmake/spacemit_vslam/spacemit_vslamTargets.cmake": "512bb762c5fe5c9b8a049def0caebeb17a8c47bd95ee96f981cb4d977a11bb27",
+    "lib/libspacemit_vslam.so": "d7f952b205b9a007068166a5e720f0cb80765030d14e848198e27487a640f7e8"
+  }
+}

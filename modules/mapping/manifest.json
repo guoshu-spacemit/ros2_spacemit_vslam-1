@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "package": "spacemit_mapping",
+  "target": {
+    "system": "Linux",
+    "processor": "riscv64",
+    "elf_class": 64,
+    "endianness": "little",
+    "isa": "rv64i2p1_m2p0_a2p1_f2p2_d2p2_c2p0_b1p0_v1p0_zic64b1p0_zicbom1p0_zicbop1p0_zicboz1p0_ziccamoa1p0_ziccif1p0_zicclsm1p0_ziccrse1p0_zicntr2p0_zicond1p0_zicsr2p0_zifencei2p0_zihintntl1p0_zihintpause2p0_zihpm2p0_zimop1p0_zmmul1p0_za64rs1p0_zaamo1p0_zalrsc1p0_zawrs1p0_zfa1p0_zfhmin1p0_zca1p0_zcb1p0_zcd1p0_zcmop1p0_zba1p0_zbb1p0_zbs1p0_zkt1p0_zvbb1p0_zve32f1p0_zve32x1p0_zve64d1p0_zve64f1p0_zve64x1p0_zvfhmin1p0_zvkb1p0_zvkt1p0_zvl128b1p0_zvl256b1p0_zvl32b1p0_zvl64b1p0_supm1p0",
+    "abi": "lp64d",
+    "board": "SpacemiT K3 / X100",
+    "distribution": "Bianbu 4.0.1"
+  },
+  "build": {
+    "compiler": "c++ (Bianbu 15.2.0-16ubuntu1bb3) 15.2.0",
+    "cmake": "cmake version 4.2.3",
+    "build_type": "Release",
+    "cxx_standard": 17,
+    "strip": "GNU strip --strip-unneeded",
+    "product_api": "spacemit_mapping::sdk",
+    "rtti": false,
+    "verbose_development_logs": false
+  },
+  "features": {
+    "rendering": true,
+    "map_io": false,
+    "map_sqlite": false,
+    "functional_cpp_api": true
+  },
+  "libraries": [
+    "lib/libspacemit_mapping.so"
+  ],
+  "elf": {
+    "lib/libspacemit_mapping.so": {
+      "sha256": "f87c0f588596f41ee773b6943b4bc6bcf06048817acbaead0cef84f296c0fe44",
+      "bytes": 225272,
+      "dynamic_exports": 66,
+      "exports_sha256": "e5d03877cdbde82953abea98fb20c670233339544fc4122fcd46b42f44a21afd",
+      "needed": [
+        "libz.so.1",
+        "libEGL.so.1",
+        "libGLESv2.so.2",
+        "libgbm.so.1",
+        "libdrm.so.2",
+        "libstdc++.so.6",
+        "libm.so.6",
+        "libgcc_s.so.1",
+        "libc.so.6",
+        "ld-linux-riscv64-lp64d.so.1"
+      ],
+      "soname": [
+        "libspacemit_mapping.so"
+      ],
+      "search_paths": [
+        "$ORIGIN"
+      ],
+      "isa": "rv64i2p1_m2p0_a2p1_f2p2_d2p2_c2p0_b1p0_v1p0_zic64b1p0_zicbom1p0_zicbop1p0_zicboz1p0_ziccamoa1p0_ziccif1p0_zicclsm1p0_ziccrse1p0_zicntr2p0_zicond1p0_zicsr2p0_zifencei2p0_zihintntl1p0_zihintpause2p0_zihpm2p0_zimop1p0_zmmul1p0_za64rs1p0_zaamo1p0_zalrsc1p0_zawrs1p0_zfa1p0_zfhmin1p0_zca1p0_zcb1p0_zcd1p0_zcmop1p0_zba1p0_zbb1p0_zbs1p0_zkt1p0_zvbb1p0_zve32f1p0_zve32x1p0_zve64d1p0_zve64f1p0_zve64x1p0_zvfhmin1p0_zvkb1p0_zvkt1p0_zvl128b1p0_zvl256b1p0_zvl32b1p0_zvl64b1p0_supm1p0",
+      "stripped": true
+    }
+  },
+  "files": {
+    "include/spacemit_mapping.h": "4b6fb1c16cc54bba7d3ac5627a5b47974b838bb57630ecebe4c6068f02f7559f",
+    "lib/cmake/spacemit_mapping/spacemit_mappingConfig.cmake": "97f916da5588f644f74c2a9b4e6a280e0470de522ef73e83c997b3af28a8bb28",
+    "lib/cmake/spacemit_mapping/spacemit_mappingTargets-release.cmake": "08036e0b08b34f65ccd0e342c230546e2c1b133e889f2c91e1beb0a26955ecb4",
+    "lib/cmake/spacemit_mapping/spacemit_mappingTargets.cmake": "eb82bcce2cd59a3e609ca2a135aff445d6652e6ada50bb0043b68d9cb031bb2b",
+    "lib/libspacemit_mapping.so": "f87c0f588596f41ee773b6943b4bc6bcf06048817acbaead0cef84f296c0fe44"
+  }
+}
